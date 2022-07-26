@@ -85,6 +85,8 @@ Getting Started
         --values ${HOME}/environment/grafana/grafana.yaml \
         --set service.type=LoadBalancer
 
+    echo "Sleep 180 seconds and wait for Load Balancer URL"
+    sleep 180
     export ELB=$(kubectl get svc -n grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
     echo "http://$ELB"
