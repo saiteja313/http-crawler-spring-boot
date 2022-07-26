@@ -5,7 +5,7 @@ VERSION ?= $(shell git describe --tags --always --dirty || echo "unknown")
 IMAGE = saiteja313/http-crawler-spring-boot
 IMAGE_NAME = $(IMAGE):$(VERSION)
 
-all: docker-run
+all: docker-run docker-push k8s-deploy
 
 build:
 	@echo "Maven build ..."
@@ -39,9 +39,19 @@ docker-push:
 	@echo "Push successful for \"$(IMAGE_NAME)\":latest"
 	@echo "push complete for Docker image \"$(IMAGE_NAME)\""
 
+monitor:
+	watch -n 1 kubectl get pods
+
+logs:
+	kubectl logs -f deployment/http-crawler-spring-boot
+
 k8s-deploy:
-	kubectl delete -f example-k8s-deployment.yml --ignore-not-found=true
-	kubectl apply -f example-k8s-deployment.yml
+	kubectl delete -f k8s-deployment.yml --ignore-not-found=true
+	kubectl apply -f k8s-deployment.yml
+	kubectl get pods -l app=http-crawler-spring-boot
+	kubectl wait pod --for=condition=Ready -l app=http-crawler-spring-boot
+	kubectl get pods -l app=http-crawler-spring-boot
+	kubectl logs deployment/http-crawler-spring-boot
 
 clean:
 	rm -rf target/
