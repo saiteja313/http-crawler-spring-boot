@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: http-crawler-spring-boot
+  name: http-crawler-spring-boot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-crawler-spring-boot
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: http-crawler-spring-boot
+    spec:
+      containers:
+      - image: saiteja313/http-crawler-spring-boot:latest
+        name: http-crawler-spring-boot
+        ports:
+        - containerPort: 80
+        resources: {}
+status: {}
