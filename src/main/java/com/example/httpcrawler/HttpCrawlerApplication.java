@@ -14,6 +14,9 @@ import org.springframework.context.annotation.Bean;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.annotation.Timed;
 
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 @SpringBootApplication
 @RestController
 public class HttpCrawlerApplication {
@@ -23,43 +26,39 @@ public class HttpCrawlerApplication {
 		return new TimedAspect(registry);
 	}
 
+	
 	public static void main(String[] args) throws Exception {
+		
 		SpringApplication.run(HttpCrawlerApplication.class, args);
-		URL url;
-		String[] strArrayUrls = {"https://httpstat.us/200", "https://httpstat.us/503"};
+		
+	} 
 
-		 try {
-			while (true) {  
-				//initialize an immutable list from array using asList method
-				List<String> urllist = Arrays.asList(strArrayUrls);
+	@Timed(value = "greeting.time", description = "Time taken to return greeting")
+	@GetMapping("/crawl")
+	@ResponseBody
+	public String index(@RequestParam String requestUrl) {
+		int requestUrlResponseCode;
+		try {
+			URL url;
+			url = new URL("https://" + requestUrl);
+			System.out.print("Crawling URL : " + requestUrl + "\n");	
 
-				for(String urlVal : urllist){
-					url = new URL(urlVal);
-					System.out.print("Crawling URL : " + urlVal + "\n");	
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setReadTimeout(6000);
+			connection.setDoOutput(true);
+			connection.setRequestMethod("GET");
+			requestUrlResponseCode = connection.getResponseCode();
 
-					connection.setReadTimeout(6000);
-					connection.setDoOutput(true);
-					connection.setRequestMethod("GET");
-					connection.getResponseCode();
+			System.out.println("HTTP Response code for " + url + " : " + requestUrlResponseCode);
 
-					System.out.println("HTTP Response code for " + url + " : " + connection.getResponseCode());
-
-					connection.disconnect();
-					Thread.sleep(1000);
-				}
-			}
+			connection.disconnect();
+			
 		} catch(MalformedURLException e) {
 			System.out.println("The url is not well formed: " + e.getMessage());
 		} catch (IOException e) {
 			System.out.println("An I/O error occurs: " + e.getMessage());
 		}
-	}
-
-	@Timed(value = "greeting.time", description = "Time taken to return greeting")
-	@GetMapping("/")
-	public String index() {
-		return "Greetings from Spring Boot!";
+		return "Greetings from Spring Boot Http Crawler! " + requestUrl;
 	}
 }
