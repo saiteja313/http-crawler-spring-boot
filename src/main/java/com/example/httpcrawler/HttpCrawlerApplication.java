@@ -37,7 +37,7 @@ public class HttpCrawlerApplication {
 	@GetMapping("/crawl")
 	@ResponseBody
 	public String index(@RequestParam String requestUrl) {
-		int requestUrlResponseCode;
+		int requestUrlResponseCode = 0;
 		try {
 			URL url;
 			url = new URL("https://" + requestUrl);
@@ -59,6 +59,6 @@ public class HttpCrawlerApplication {
 		} catch (IOException e) {
 			System.out.println("An I/O error occurs: " + e.getMessage());
 		}
-		return "Greetings from Spring Boot Http Crawler! " + requestUrl;
+		return "Greetings from Spring Boot Http Crawler! " + "URL " + requestUrl + " response code = " + requestUrlResponseCode + " ";
 	}
 }
